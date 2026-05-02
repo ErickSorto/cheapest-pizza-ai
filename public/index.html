@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cheapest Pizza AI</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        background: #111;
+        color: #f0f0f0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 48px 16px;
+      }
+
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      h1 span {
+        color: #f97316;
+      }
+
+      p.subtitle {
+        color: #888;
+        margin-bottom: 32px;
+        font-size: 0.95rem;
+      }
+
+      .search-card {
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 12px;
+        padding: 28px;
+        width: 100%;
+        max-width: 520px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+
+      label {
+        font-size: 0.85rem;
+        color: #aaa;
+      }
+
+      input {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 8px;
+        color: #f0f0f0;
+        font-size: 1rem;
+        padding: 10px 14px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+
+      input:focus {
+        border-color: #f97316;
+      }
+
+      button {
+        width: 100%;
+        background: #f97316;
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 12px;
+        margin-top: 4px;
+        transition: background 0.15s;
+      }
+
+      button:hover {
+        background: #ea6c0a;
+      }
+
+      button:disabled {
+        background: #555;
+        cursor: not-allowed;
+      }
+
+      #results {
+        width: 100%;
+        max-width: 520px;
+        margin-top: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .result-card {
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 12px;
+        padding: 20px;
+      }
+
+      .result-card h3 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .result-card .address {
+        color: #888;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+      }
+
+      .deal-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #222;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+      }
+
+      .deal-row .item {
+        font-size: 0.9rem;
+      }
+
+      .deal-row .price {
+        color: #4ade80;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .note {
+        color: #999;
+        font-size: 0.82rem;
+        font-style: italic;
+      }
+
+      .error {
+        color: #f87171;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      .spinner {
+        display: none;
+        text-align: center;
+        color: #888;
+        padding: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cheapest <span>Pizza</span> AI</h1>
+    <p class="subtitle">Find the best pizza deals near you, powered by AI.</p>
+
+    <div class="search-card">
+      <div class="field">
+        <label for="location">Location</label>
+        <input
+          id="location"
+          type="text"
+          placeholder="e.g. Brooklyn, NY or 90210"
+        />
+      </div>
+      <div class="field">
+        <label for="radius">Radius (miles)</label>
+        <input id="radius" type="number" placeholder="e.g. 5" min="1" max="50" />
+      </div>
+      <button id="search-btn" onclick="searchPizza()">Find Cheapest Pizza</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+      async function searchPizza() {
+        const location = document.getElementById("location").value.trim();
+        const radius = document.getElementById("radius").value.trim();
+        const resultsEl = document.getElementById("results");
+        const btn = document.getElementById("search-btn");
+
+        if (!location || !radius) {
+          resultsEl.innerHTML = '<p class="error">Please enter a location and radius.</p>';
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Searching...";
+        resultsEl.innerHTML = '<p class="spinner" style="display:block">Finding the cheapest slices near you...</p>';
+
+        try {
+          const res = await fetch("/api/pizza/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location, radius: Number(radius) }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            resultsEl.innerHTML = `<p class="error">${data.error || "Something went wrong."}</p>`;
+            return;
+          }
+
+          if (!data.results || data.results.length === 0) {
+            resultsEl.innerHTML = '<p class="error">No results found. Try a different location.</p>';
+            return;
+          }
+
+          resultsEl.innerHTML = data.results
+            .map(
+              (r) => `
+              <div class="result-card">
+                <h3>${r.name}</h3>
+                <p class="address">${r.address}</p>
+                <div class="deal-row">
+                  <span class="item">${r.cheapestItem}</span>
+                  <span class="price">${r.price}</span>
+                </div>
+                <p class="note">${r.note}</p>
+              </div>`
+            )
+            .join("");
+        } catch (err) {
+          resultsEl.innerHTML = '<p class="error">Failed to connect to server.</p>';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Find Cheapest Pizza";
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") searchPizza();
+      });
+    </script>
+  </body>
+</html>
