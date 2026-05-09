@@ -1,8 +1,9 @@
 const express = require("express");
-const OpenAI = require("openai");
+const Anthropic = require("@anthropic-ai/sdk");
 
 const router = express.Router();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Uses ANTHROPIC_API_KEY from environment (set in .env.local)
+const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 router.post("/search", async (req, res) => {
   const { location, radius } = req.body;
@@ -11,17 +12,26 @@ router.post("/search", async (req, res) => {
     return res.status(400).json({ error: "location and radius are required" });
   }
 
-  const prompt = `You are a pizza deal finder. Find the cheapest pizza options within ${radius} miles of ${location}.
-Return ONLY valid JSON with this exact shape, no extra text:
-{ "results": [ { "name": string, "address": string, "cheapestItem": string, "price": string, "note": string } ] }`;
+  const prompt = `Search the web and find the cheapest pizza options available within ${radius} miles of ${location}.
+Look up real pizza restaurants in that area and their current deals or menu prices.
+Return ONLY valid JSON with this exact shape — no markdown, no extra text:
+{ "results": [ { "name": string, "address": string, "cheapestItem": string, "price": string, "note": string } ] }
+Include 3-6 results sorted from cheapest to most expensive. The "note" field should mention the deal type or any relevant info (e.g. "Lunch special", "Delivery only", etc.).`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5.5",
-      input: prompt,
+    // Use Claude with web_search so results are real and current
+    const response = await anthropic.messages.create({
+      model: "claude-opus-4-5",
+      max_tokens: 1024,
+      tools: [{ type: "web_search_20250305", name: "web_search" }],
+      messages: [{ role: "user", content: prompt }],
     });
 
-    const raw = response.output_text;
+    // Extract the final text block from Claude's response
+    const textBlock = response.content.find((b) => b.type === "text");
+    if (!textBlock) throw new Error("No text in Claude response");
+
+    const raw = textBlock.text;
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON found in response");
 
