@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cheapest Pizza AI</title>
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
         font-family: system-ui, sans-serif;
@@ -22,21 +18,9 @@
         padding: 48px 16px;
       }
 
-      h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-      }
-
-      h1 span {
-        color: #f97316;
-      }
-
-      p.subtitle {
-        color: #888;
-        margin-bottom: 32px;
-        font-size: 0.95rem;
-      }
+      h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+      h1 span { color: #f97316; }
+      p.subtitle { color: #888; margin-bottom: 32px; font-size: 0.95rem; }
 
       .search-card {
         background: #1a1a1a;
@@ -47,17 +31,8 @@
         max-width: 520px;
       }
 
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 16px;
-      }
-
-      label {
-        font-size: 0.85rem;
-        color: #aaa;
-      }
+      .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+      label { font-size: 0.85rem; color: #aaa; }
 
       input {
         background: #222;
@@ -70,9 +45,7 @@
         transition: border-color 0.15s;
       }
 
-      input:focus {
-        border-color: #f97316;
-      }
+      input:focus { border-color: #f97316; }
 
       button {
         width: 100%;
@@ -88,15 +61,57 @@
         transition: background 0.15s;
       }
 
-      button:hover {
-        background: #ea6c0a;
+      button:hover { background: #ea6c0a; }
+      button:disabled { background: #555; cursor: not-allowed; }
+
+      /* ── Cat GIF loader ── */
+      #gif-loader {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        margin-top: 32px;
+        width: 100%;
+        max-width: 520px;
       }
 
-      button:disabled {
-        background: #555;
-        cursor: not-allowed;
+      #gif-loader.active { display: flex; }
+
+      #gif-container {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
       }
 
+      .gif-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      .gif-slide.active { opacity: 1; }
+
+      .gif-slide iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+
+      #gif-caption {
+        font-size: 0.9rem;
+        color: #888;
+        text-align: center;
+        min-height: 1.4em;
+        transition: opacity 0.3s ease;
+      }
+
+      /* ── Results ── */
       #results {
         width: 100%;
         max-width: 520px;
@@ -113,17 +128,8 @@
         padding: 20px;
       }
 
-      .result-card h3 {
-        font-size: 1.05rem;
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
-
-      .result-card .address {
-        color: #888;
-        font-size: 0.85rem;
-        margin-bottom: 10px;
-      }
+      .result-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+      .result-card .address { color: #888; font-size: 0.85rem; margin-bottom: 10px; }
 
       .deal-row {
         display: flex;
@@ -135,34 +141,31 @@
         margin-bottom: 8px;
       }
 
-      .deal-row .item {
-        font-size: 0.9rem;
+      .deal-row .item { font-size: 0.9rem; }
+      .deal-row .price { color: #4ade80; font-weight: 700; font-size: 1rem; }
+      .note { color: #999; font-size: 0.82rem; font-style: italic; }
+
+      .order-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 8px 16px;
+        width: auto;
+        background: none;
+        border: 1.5px solid #f97316;
+        border-radius: 8px;
+        color: #f97316;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
       }
 
-      .deal-row .price {
-        color: #4ade80;
-        font-weight: 700;
-        font-size: 1rem;
-      }
+      .order-btn:hover { background: #f97316; color: #fff; }
+      .order-btn svg { flex-shrink: 0; }
 
-      .note {
-        color: #999;
-        font-size: 0.82rem;
-        font-style: italic;
-      }
-
-      .error {
-        color: #f87171;
-        text-align: center;
-        font-size: 0.9rem;
-      }
-
-      .spinner {
-        display: none;
-        text-align: center;
-        color: #888;
-        padding: 16px 0;
-      }
+      .error { color: #f87171; text-align: center; font-size: 0.9rem; }
     </style>
   </head>
   <body>
@@ -172,22 +175,95 @@
     <div class="search-card">
       <div class="field">
         <label for="location">Location</label>
-        <input
-          id="location"
-          type="text"
-          placeholder="e.g. Brooklyn, NY or 90210"
-        />
+        <input id="location" type="text" placeholder="e.g. Brooklyn, NY or 90210">
       </div>
       <div class="field">
         <label for="radius">Radius (miles)</label>
-        <input id="radius" type="number" placeholder="e.g. 5" min="1" max="50" />
+        <input id="radius" type="number" placeholder="e.g. 5" min="1" max="50">
       </div>
-      <button id="search-btn" onclick="searchPizza()">Find Cheapest Pizza</button>
+      <button type="button" id="search-btn" onclick="searchPizza()">Find Cheapest Pizza</button>
+    </div>
+
+    <!-- Cat GIF loader -->
+    <div id="gif-loader">
+      <div id="gif-container">
+        <div class="gif-slide active">
+          <iframe src="https://tenor.com/embed/3585895304272773690" title="Cat making pizza" loading="lazy"></iframe>
+        </div>
+        <div class="gif-slide">
+          <iframe src="https://tenor.com/embed/15352601151133641343" title="Cat eating pizza" loading="lazy"></iframe>
+        </div>
+        <div class="gif-slide">
+          <iframe src="https://tenor.com/embed/4480725" title="Cheese pizza cat" loading="lazy"></iframe>
+        </div>
+        <div class="gif-slide">
+          <iframe src="https://tenor.com/embed/22351867" title="Cat begging for pizza" loading="lazy"></iframe>
+        </div>
+        <div class="gif-slide">
+          <iframe src="https://tenor.com/embed/27045411" title="Pizza cat" loading="lazy"></iframe>
+        </div>
+        <div class="gif-slide">
+          <iframe src="https://tenor.com/embed/4543991" title="Super pizza cat" loading="lazy"></iframe>
+        </div>
+      </div>
+      <p id="gif-caption">Consulting the pizza cats...</p>
     </div>
 
     <div id="results"></div>
 
     <script>
+      // ── Cat GIF loader ──
+      const CAPTIONS = [
+        "Consulting the pizza cats...",
+        "Sniffing out the best deals...",
+        "Calculating cheese-to-price ratios...",
+        "The cats demand pepperoni...",
+        "Interrogating local delivery drivers...",
+        "Almost there, whiskers on the case...",
+      ];
+
+      let gifIndex = 0;
+      let gifTimer = null;
+      const slides = document.querySelectorAll(".gif-slide");
+
+      function startGifs() {
+        gifIndex = 0;
+        setGifSlide(0);
+        document.getElementById("gif-loader").classList.add("active");
+        gifTimer = setInterval(() => {
+          gifIndex = (gifIndex + 1) % slides.length;
+          setGifSlide(gifIndex);
+        }, 2500);
+      }
+
+      function stopGifs() {
+        clearInterval(gifTimer);
+        gifTimer = null;
+        document.getElementById("gif-loader").classList.remove("active");
+      }
+
+      function setGifSlide(idx) {
+        slides.forEach((el, i) => el.classList.toggle("active", i === idx));
+        const caption = document.getElementById("gif-caption");
+        caption.style.opacity = "0";
+        setTimeout(() => {
+          caption.textContent = CAPTIONS[idx];
+          caption.style.opacity = "1";
+        }, 150);
+      }
+
+      // ── Order link with Text Fragment for auto-highlighting ──
+      function openOrder(url, item) {
+        try {
+          const u = new URL(url);
+          u.hash = ":~:text=" + encodeURIComponent(item.slice(0, 50));
+          window.open(u.toString(), "_blank", "noopener,noreferrer");
+        } catch {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+      }
+
+      // ── Search ──
       async function searchPizza() {
         const location = document.getElementById("location").value.trim();
         const radius = document.getElementById("radius").value.trim();
@@ -201,7 +277,8 @@
 
         btn.disabled = true;
         btn.textContent = "Searching...";
-        resultsEl.innerHTML = '<p class="spinner" style="display:block">Finding the cheapest slices near you...</p>';
+        resultsEl.innerHTML = "";
+        startGifs();
 
         try {
           const res = await fetch("/api/pizza/search", {
@@ -222,9 +299,8 @@
             return;
           }
 
-          resultsEl.innerHTML = data.results
-            .map(
-              (r) => `
+          const cards = data.results.map((r, i) => ({
+            html: `
               <div class="result-card">
                 <h3>${r.name}</h3>
                 <p class="address">${r.address}</p>
@@ -233,12 +309,29 @@
                   <span class="price">${r.price}</span>
                 </div>
                 <p class="note">${r.note}</p>
-              </div>`
-            )
-            .join("");
-        } catch (err) {
+                ${r.orderUrl ? `<button type="button" class="order-btn" id="order-btn-${i}">
+                  Order Now
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M2 11L11 2M11 2H5M11 2V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>` : ""}
+              </div>`,
+            r, i
+          }));
+
+          resultsEl.innerHTML = cards.map(c => c.html).join("");
+
+          cards.forEach(({ r, i }) => {
+            if (!r.orderUrl) return;
+            document.getElementById(`order-btn-${i}`).addEventListener("click", () => {
+              openOrder(r.orderUrl, r.cheapestItem);
+            });
+          });
+
+        } catch {
           resultsEl.innerHTML = '<p class="error">Failed to connect to server.</p>';
         } finally {
+          stopGifs();
           btn.disabled = false;
           btn.textContent = "Find Cheapest Pizza";
         }
