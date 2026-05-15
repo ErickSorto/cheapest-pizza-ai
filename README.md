@@ -4,7 +4,10 @@ Submitted by: Erick Sorto (<!-- YOUR DIRECTORY ID -->)
 
 Group Members: 
 Erick Sorto (<!-- YOUR DIRECTORY ID -->)
-Cedric Dzobosse  cdzoboss@terpmail.umd.edu
+Cedric Dzobosse  (cdzoboss)
+Nathan Dung
+Bryce
+Logan
 
 App Description: A Node.js/Express web app where users build and save custom pizza profiles (stored in MongoDB), then use AI-powered web search to find the cheapest real restaurants near them that serve their pizza. Includes AI-generated pizza suggestions and names.
 
