@@ -177,7 +177,7 @@ Return ONLY valid JSON with this exact shape, no extra text:
 
   try {
     const response = await openai.responses.create({
-      model: "gpt-5.5",
+      model: "gpt-5-mini",
       tools: [{ type: "web_search_preview" }],
       input: prompt,
     });
