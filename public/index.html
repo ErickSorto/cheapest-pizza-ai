@@ -4,52 +4,553 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cheapest Pizza AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="styles.css" rel="stylesheet">
   </head>
   <body>
-    <h1>Cheapest <span>Pizza</span> AI</h1>
-    <p class="subtitle">Find the best pizza deals near you, powered by AI.</p>
 
-    <div class="search-card">
-      <div class="field">
-        <label for="location">Location</label>
-        <input id="location" type="text" placeholder="e.g. Brooklyn, NY or 90210">
-      </div>
-      <div class="field">
-        <label for="radius">Radius (miles)</label>
-        <input id="radius" type="number" placeholder="e.g. 5" min="1" max="50">
-      </div>
-      <button type="button" id="search-btn" onclick="searchPizza()">Find Cheapest Pizza</button>
-    </div>
+    <header>
+      <div class="logo">🍕</div>
+      <h1>Cheapest <span>Pizza</span> AI</h1>
+      <p class="subtitle">Build your dream pizza &amp; find the best deals near you.</p>
+    </header>
 
-    <!-- Cat GIF loader -->
-    <div id="gif-loader">
-      <div id="gif-container">
-        <div class="gif-slide active">
-          <iframe src="https://tenor.com/embed/3585895304272773690" title="Cat making pizza" loading="lazy"></iframe>
-        </div>
-        <div class="gif-slide">
-          <iframe src="https://tenor.com/embed/15352601151133641343" title="Cat eating pizza" loading="lazy"></iframe>
-        </div>
-        <div class="gif-slide">
-          <iframe src="https://tenor.com/embed/4480725" title="Cheese pizza cat" loading="lazy"></iframe>
-        </div>
-        <div class="gif-slide">
-          <iframe src="https://tenor.com/embed/22351867" title="Cat begging for pizza" loading="lazy"></iframe>
-        </div>
-        <div class="gif-slide">
-          <iframe src="https://tenor.com/embed/27045411" title="Pizza cat" loading="lazy"></iframe>
-        </div>
-        <div class="gif-slide">
-          <iframe src="https://tenor.com/embed/4543991" title="Super pizza cat" loading="lazy"></iframe>
-        </div>
-      </div>
-      <p id="gif-caption">Consulting the pizza cats...</p>
-    </div>
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="build" role="tab" aria-selected="true">
+        <i class="fa-solid fa-pizza-slice"></i> Build
+      </button>
+      <button type="button" class="tab" data-tab="find" role="tab" aria-selected="false">
+        <i class="fa-solid fa-map-location-dot"></i> Find Deals
+      </button>
+      <button type="button" class="tab" data-tab="saved" role="tab" aria-selected="false">
+        <i class="fa-solid fa-heart"></i> My Pizzas
+      </button>
+    </nav>
 
-    <div id="results"></div>
+    <!-- ── Build Tab ── -->
+    <section class="tab-panel active" id="tab-build">
+      <div class="card">
+
+        <!-- Edit mode banner -->
+        <div id="edit-banner" class="edit-banner">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Editing "<span id="edit-banner-name"></span>"</span>
+          <button type="button" class="cancel-edit-btn" onclick="cancelEdit()">
+            <i class="fa-solid fa-xmark"></i> Cancel
+          </button>
+        </div>
+
+        <button type="button" class="btn-ai" id="ai-btn" onclick="aiMakePizza()">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI Make My Pizza
+        </button>
+
+        <div class="divider"><span>or build it yourself</span></div>
+
+        <div class="field">
+          <label><i class="fa-solid fa-circle-dot"></i> Order Type</label>
+          <div class="order-toggle" id="order-type-toggle">
+            <button type="button" class="order-opt selected" data-val="Whole">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9"/>
+                <line x1="12" y1="3" x2="12" y2="21"/>
+                <line x1="3.45" y1="7.5" x2="20.55" y2="16.5"/>
+                <line x1="20.55" y1="7.5" x2="3.45" y2="16.5"/>
+              </svg>
+              <span>Whole Pizza</span>
+            </button>
+            <button type="button" class="order-opt" data-val="Slice">
+              <i class="fa-solid fa-pizza-slice"></i>
+              <span>By the Slice</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="pizza-name"><i class="fa-solid fa-tag"></i> Pizza Name</label>
+          <input id="pizza-name" type="text" placeholder="Leave blank for AI to name it…" maxlength="60">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label><i class="fa-solid fa-expand"></i> Size</label>
+            <div class="pill-group" id="size-group">
+              <button type="button" class="pill" data-val="Small">Small</button>
+              <button type="button" class="pill" data-val="Medium">Med</button>
+              <button type="button" class="pill selected" data-val="Large">Large</button>
+              <button type="button" class="pill" data-val="XL">XL</button>
+            </div>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-layer-group"></i> Crust</label>
+            <div class="pill-group" id="crust-group">
+              <button type="button" class="pill" data-val="Thin">Thin</button>
+              <button type="button" class="pill selected" data-val="Hand-Tossed">Hand</button>
+              <button type="button" class="pill" data-val="Thick">Thick</button>
+              <button type="button" class="pill" data-val="Stuffed">Stuffed</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label><i class="fa-solid fa-droplet"></i> Sauce</label>
+          <div class="pill-group" id="sauce-group">
+            <button type="button" class="pill selected" data-val="Marinara">🍅 Marinara</button>
+            <button type="button" class="pill" data-val="White">🤍 White</button>
+            <button type="button" class="pill" data-val="BBQ">🔥 BBQ</button>
+            <button type="button" class="pill" data-val="Pesto">🌿 Pesto</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label><i class="fa-solid fa-cheese"></i> Toppings</label>
+          <div class="topping-grid" id="topping-grid">
+            <label class="topping-chip"><input type="checkbox" value="Pepperoni"><span>🥩 Pepperoni</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Sausage"><span>🌭 Sausage</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Mushrooms"><span>🍄 Mushrooms</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Onions"><span>🧅 Onions</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Bell Peppers"><span>🫑 Bell Peppers</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Black Olives"><span>🫒 Olives</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Jalapeños"><span>🌶️ Jalapeños</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Bacon"><span>🥓 Bacon</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Chicken"><span>🍗 Chicken</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Pineapple"><span>🍍 Pineapple</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Spinach"><span>🥬 Spinach</span></label>
+            <label class="topping-chip"><input type="checkbox" value="Extra Cheese"><span>🧀 Extra Cheese</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="pizza-notes"><i class="fa-solid fa-pen"></i> Notes <span class="label-opt">(optional)</span></label>
+          <input id="pizza-notes" type="text" placeholder="e.g. well-done, light sauce…" maxlength="140">
+        </div>
+
+        <button type="button" class="btn-primary" id="save-btn" onclick="savePizza()">
+          <i class="fa-solid fa-floppy-disk"></i> Save Pizza
+        </button>
+        <p id="save-msg" class="save-msg"></p>
+
+        <!-- Post-save CTA -->
+        <div id="post-save-cta" class="post-save-cta">
+          <button type="button" onclick="goSearchFor(lastSavedId)">
+            <i class="fa-solid fa-magnifying-glass"></i> Find this pizza near me
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Find Deals Tab ── -->
+    <section class="tab-panel" id="tab-find">
+      <div class="card">
+
+        <!-- Step 1 -->
+        <div class="find-step">
+          <div class="step-header">
+            <span class="step-badge">1</span>
+            <span class="step-title">Which pizza are you searching for?</span>
+          </div>
+          <div id="pizza-selector"></div>
+        </div>
+
+        <div class="step-divider"></div>
+
+        <!-- Step 2 -->
+        <div class="find-step">
+          <div class="step-header">
+            <span class="step-badge">2</span>
+            <span class="step-title">Where should we look?</span>
+          </div>
+          <div class="field">
+            <label for="location"><i class="fa-solid fa-location-dot"></i> Location</label>
+            <input id="location" type="text" placeholder="e.g. Brooklyn, NY or 90210">
+          </div>
+          <div class="field">
+            <label for="radius"><i class="fa-solid fa-circle-notch"></i> Radius (miles)</label>
+            <input id="radius" type="number" placeholder="e.g. 5" min="1" max="50">
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-store"></i> Restaurant Type</label>
+            <div class="pill-group" id="restaurant-type-group">
+              <button type="button" class="pill" data-val="Chains">
+                <i class="fa-solid fa-building"></i> Big Chains
+              </button>
+              <button type="button" class="pill" data-val="Local">
+                <i class="fa-solid fa-house"></i> Local Only
+              </button>
+              <button type="button" class="pill selected" data-val="Both">
+                <i class="fa-solid fa-globe"></i> Both
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-primary" id="search-btn" onclick="searchPizza()" disabled>
+          <i class="fa-solid fa-magnifying-glass"></i> Find Cheapest Pizza
+        </button>
+        <p class="search-hint" id="search-hint">
+          <i class="fa-solid fa-arrow-up"></i> Select a pizza above to search
+        </p>
+      </div>
+
+      <div id="gif-loader">
+        <div id="gif-container">
+          <div class="gif-slide active"><iframe src="https://tenor.com/embed/3585895304272773690" title="Cat making pizza" loading="lazy"></iframe></div>
+          <div class="gif-slide"><iframe src="https://tenor.com/embed/15352601151133641343" title="Cat eating pizza" loading="lazy"></iframe></div>
+          <div class="gif-slide"><iframe src="https://tenor.com/embed/4480725" title="Cheese pizza cat" loading="lazy"></iframe></div>
+          <div class="gif-slide"><iframe src="https://tenor.com/embed/22351867" title="Cat begging for pizza" loading="lazy"></iframe></div>
+          <div class="gif-slide"><iframe src="https://tenor.com/embed/27045411" title="Pizza cat" loading="lazy"></iframe></div>
+          <div class="gif-slide"><iframe src="https://tenor.com/embed/4543991" title="Super pizza cat" loading="lazy"></iframe></div>
+        </div>
+        <p id="gif-caption">Consulting the pizza cats...</p>
+      </div>
+
+      <div id="search-context-bar" class="search-context-bar"></div>
+      <div id="results"></div>
+    </section>
+
+    <!-- ── My Pizzas Tab ── -->
+    <section class="tab-panel" id="tab-saved">
+      <div id="saved-pizzas">
+        <p class="loading-text">Loading your pizzas…</p>
+      </div>
+    </section>
 
     <script>
+      // ── Global state ──
+      let loadedPizzas = [];
+      let selectedPizza = null;
+      let lastSavedId = null;
+      let editingPizzaId = null;
+
+      // ── Tab switching ──
+      function switchToTab(name) {
+        document.querySelectorAll(".tab").forEach(t => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+        const tab = document.querySelector(`.tab[data-tab="${name}"]`);
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        document.getElementById("tab-" + name).classList.add("active");
+        if (name === "saved") loadSavedPizzas();
+        if (name === "find") loadSearchPizzas();
+      }
+
+      document.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => switchToTab(btn.dataset.tab));
+      });
+
+      // ── Pill groups ──
+      document.querySelectorAll(".pill-group").forEach(group => {
+        group.addEventListener("click", e => {
+          const pill = e.target.closest(".pill");
+          if (!pill) return;
+          group.querySelectorAll(".pill").forEach(p => p.classList.remove("selected"));
+          pill.classList.add("selected");
+        });
+      });
+
+      document.getElementById("order-type-toggle").addEventListener("click", e => {
+        const opt = e.target.closest(".order-opt");
+        if (!opt) return;
+        document.querySelectorAll(".order-opt").forEach(o => o.classList.remove("selected"));
+        opt.classList.add("selected");
+      });
+
+      function getPillValue(groupId) {
+        const sel = document.querySelector(`#${groupId} .pill.selected`);
+        return sel ? sel.dataset.val : null;
+      }
+
+      function getOrderType() {
+        const sel = document.querySelector("#order-type-toggle .order-opt.selected");
+        return sel ? sel.dataset.val : "Whole";
+      }
+
+      function getFormState() {
+        return {
+          size: getPillValue("size-group"),
+          crust: getPillValue("crust-group"),
+          sauce: getPillValue("sauce-group"),
+          orderType: getOrderType(),
+          toppings: [...document.querySelectorAll("#topping-grid input:checked")].map(c => c.value),
+          notes: document.getElementById("pizza-notes").value.trim(),
+        };
+      }
+
+      function applyFormState(state) {
+        const pillMap = { "size-group": state.size, "crust-group": state.crust, "sauce-group": state.sauce };
+        Object.entries(pillMap).forEach(([groupId, val]) => {
+          if (!val) return;
+          document.getElementById(groupId).querySelectorAll(".pill").forEach(p => {
+            p.classList.toggle("selected", p.dataset.val === val);
+          });
+        });
+        if (state.orderType) {
+          document.querySelectorAll(".order-opt").forEach(o => {
+            o.classList.toggle("selected", o.dataset.val === state.orderType);
+          });
+        }
+        if (state.toppings) {
+          document.querySelectorAll("#topping-grid input").forEach(cb => {
+            cb.checked = state.toppings.includes(cb.value);
+          });
+        }
+        if (state.notes !== undefined) document.getElementById("pizza-notes").value = state.notes;
+        if (state.name !== undefined) document.getElementById("pizza-name").value = state.name;
+      }
+
+      // ── Edit mode ──
+      function editPizza(id) {
+        const pizza = loadedPizzas.find(p => p._id === id);
+        if (!pizza) return;
+
+        editingPizzaId = id;
+        applyFormState(pizza);
+
+        document.getElementById("edit-banner-name").textContent = pizza.name;
+        document.getElementById("edit-banner").classList.add("visible");
+        document.getElementById("ai-btn").style.display = "none";
+        document.getElementById("save-btn").innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Pizza';
+        document.getElementById("post-save-cta").classList.remove("visible");
+
+        switchToTab("build");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function cancelEdit() {
+        editingPizzaId = null;
+        document.getElementById("edit-banner").classList.remove("visible");
+        document.getElementById("ai-btn").style.display = "";
+        document.getElementById("save-btn").innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Pizza';
+        document.getElementById("pizza-name").value = "";
+        document.getElementById("pizza-notes").value = "";
+        document.querySelectorAll("#topping-grid input").forEach(c => c.checked = false);
+      }
+
+      // ── AI Make My Pizza ──
+      async function aiMakePizza() {
+        const btn = document.getElementById("ai-btn");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cooking up ideas…';
+        try {
+          const res = await fetch("/api/pizza/ai-suggest", { method: "POST" });
+          const data = await res.json();
+          if (!res.ok) { alert(data.error || "AI failed."); return; }
+          applyFormState(data);
+        } catch { alert("Could not connect to server."); }
+        finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI Make My Pizza';
+        }
+      }
+
+      // ── Save pizza ──
+      async function savePizza() {
+        const btn = document.getElementById("save-btn");
+        const msg = document.getElementById("save-msg");
+        const cta = document.getElementById("post-save-cta");
+        const state = getFormState();
+        let name = document.getElementById("pizza-name").value.trim();
+
+        btn.disabled = true;
+        msg.textContent = "";
+        cta.classList.remove("visible");
+
+        if (!name) {
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Naming your pizza…';
+          try {
+            const res = await fetch("/api/pizza/ai-name", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(state),
+            });
+            const data = await res.json();
+            name = (res.ok && data.name) ? data.name : "My Pizza";
+            document.getElementById("pizza-name").value = name;
+          } catch { name = "My Pizza"; document.getElementById("pizza-name").value = name; }
+        }
+
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${editingPizzaId ? "Updating…" : "Saving…"}`;
+
+        const isEditing = !!editingPizzaId;
+        const url = isEditing ? `/api/pizza/${editingPizzaId}` : "/api/pizza/create";
+        const method = isEditing ? "PUT" : "POST";
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, ...state }),
+          });
+          const data = await res.json();
+          if (!res.ok) { showMsg(msg, data.error || "Failed to save.", "error"); return; }
+
+          loadedPizzas = []; // invalidate cache
+
+          if (isEditing) {
+            showMsg(msg, `"${data.name}" updated!`, "success");
+            cancelEdit();
+          } else {
+            lastSavedId = data._id;
+            showMsg(msg, `"${data.name}" saved!`, "success");
+            cta.classList.add("visible");
+            document.getElementById("pizza-name").value = "";
+            document.getElementById("pizza-notes").value = "";
+            document.querySelectorAll("#topping-grid input").forEach(c => c.checked = false);
+          }
+        } catch { showMsg(msg, "Could not connect to server.", "error"); }
+        finally {
+          btn.disabled = false;
+          btn.innerHTML = editingPizzaId
+            ? '<i class="fa-solid fa-floppy-disk"></i> Update Pizza'
+            : '<i class="fa-solid fa-floppy-disk"></i> Save Pizza';
+        }
+      }
+
+      function showMsg(el, text, type) {
+        el.textContent = text;
+        el.className = "save-msg " + type;
+        setTimeout(() => { el.textContent = ""; el.className = "save-msg"; }, 5000);
+      }
+
+      // ── Pizza selector (Find tab) ──
+      async function loadSearchPizzas() {
+        const container = document.getElementById("pizza-selector");
+        container.innerHTML = '<p class="chooser-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading your pizzas…</p>';
+        try {
+          const res = await fetch("/api/pizza/list");
+          loadedPizzas = await res.json();
+          renderPizzaSelector();
+        } catch {
+          container.innerHTML = '<p class="chooser-empty">Failed to load pizzas.</p>';
+        }
+      }
+
+      function renderPizzaSelector() {
+        const container = document.getElementById("pizza-selector");
+        const searchBtn = document.getElementById("search-btn");
+        const hint = document.getElementById("search-hint");
+
+        if (!loadedPizzas.length) {
+          container.innerHTML = `
+            <div class="chooser-empty">
+              <i class="fa-solid fa-pizza-slice chooser-empty-icon"></i>
+              <p>No saved pizzas yet.</p>
+              <button type="button" class="btn-switch" onclick="switchToTab('build')">
+                <i class="fa-solid fa-plus"></i> Build a Pizza First
+              </button>
+            </div>`;
+          searchBtn.disabled = true;
+          hint.style.display = "flex";
+          return;
+        }
+
+        container.innerHTML = `<div class="chooser-list">${
+          loadedPizzas.map(p => {
+            const isSelected = selectedPizza && selectedPizza._id === p._id;
+            const toppingStr = p.toppings.length
+              ? p.toppings.slice(0, 3).join(", ") + (p.toppings.length > 3 ? ` +${p.toppings.length - 3} more` : "")
+              : "Plain cheese";
+            return `
+              <div class="chooser-card${isSelected ? " selected" : ""}" onclick="selectForSearch('${p._id}')">
+                <div class="chooser-check"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="chooser-info">
+                  <span class="chooser-name">${p.name}</span>
+                  <span class="chooser-meta">${p.size} · ${p.crust} · ${p.sauce}</span>
+                  <span class="chooser-toppings">${toppingStr}</span>
+                </div>
+                <span class="chooser-badge ${p.orderType === 'Slice' ? 'slice' : 'whole'}">
+                  ${p.orderType === 'Slice' ? '<i class="fa-solid fa-pizza-slice"></i>' : '🍕'} ${p.orderType}
+                </span>
+              </div>`;
+          }).join("")
+        }</div>`;
+
+        const hasSel = !!selectedPizza;
+        searchBtn.disabled = !hasSel;
+        hint.style.display = hasSel ? "none" : "flex";
+      }
+
+      function selectForSearch(id) {
+        selectedPizza = loadedPizzas.find(p => p._id === id) || null;
+        renderPizzaSelector();
+      }
+
+      // ── "Search for this" from My Pizzas or post-save ──
+      async function goSearchFor(id) {
+        if (!id) return;
+        if (!loadedPizzas.length) {
+          const res = await fetch("/api/pizza/list");
+          loadedPizzas = await res.json();
+        }
+        selectedPizza = loadedPizzas.find(p => p._id === id) || null;
+        switchToTab("find");
+      }
+
+      // ── Load saved pizzas ──
+      async function loadSavedPizzas() {
+        const container = document.getElementById("saved-pizzas");
+        container.innerHTML = '<p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</p>';
+        try {
+          const res = await fetch("/api/pizza/list");
+          loadedPizzas = await res.json();
+          if (!loadedPizzas.length) {
+            container.innerHTML = '<p class="loading-text">No saved pizzas yet — build one!</p>';
+            return;
+          }
+          container.innerHTML = loadedPizzas.map(p => `
+            <div class="pizza-card" id="pc-${p._id}">
+              <div class="pizza-card-top">
+                <span class="pizza-card-name">${p.name}</span>
+                <div class="pizza-card-actions">
+                  <span class="order-badge ${p.orderType === 'Slice' ? 'slice' : 'whole'}">
+                    ${p.orderType === 'Slice' ? '<i class="fa-solid fa-pizza-slice"></i> Slice' : '🍕 Whole'}
+                  </span>
+                  <button type="button" class="edit-icon-btn" onclick="editPizza('${p._id}')" title="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button type="button" class="delete-btn" onclick="deletePizza('${p._id}')" title="Delete">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="pizza-meta">
+                <span class="badge"><i class="fa-solid fa-expand"></i> ${p.size}</span>
+                <span class="badge"><i class="fa-solid fa-layer-group"></i> ${p.crust}</span>
+                <span class="badge sauce-badge"><i class="fa-solid fa-droplet"></i> ${p.sauce}</span>
+              </div>
+              ${p.toppings.length ? `<p class="toppings-list"><i class="fa-solid fa-cheese"></i> ${p.toppings.join(" · ")}</p>` : ""}
+              ${p.notes ? `<p class="pizza-notes-text"><i class="fa-solid fa-pen"></i> ${p.notes}</p>` : ""}
+              <button type="button" class="search-this-btn" onclick="goSearchFor('${p._id}')">
+                <i class="fa-solid fa-magnifying-glass"></i> Find this pizza near me
+              </button>
+            </div>`).join("");
+        } catch {
+          container.innerHTML = '<p class="loading-text error">Failed to load pizzas.</p>';
+        }
+      }
+
+      async function deletePizza(id) {
+        const el = document.getElementById("pc-" + id);
+        if (el) { el.style.opacity = "0"; el.style.transform = "translateY(-4px) scale(0.97)"; }
+        try {
+          await fetch(`/api/pizza/${id}`, { method: "DELETE" });
+          loadedPizzas = loadedPizzas.filter(p => p._id !== id);
+          if (selectedPizza && selectedPizza._id === id) selectedPizza = null;
+          setTimeout(() => {
+            if (el) el.remove();
+            if (!document.querySelector(".pizza-card")) {
+              document.getElementById("saved-pizzas").innerHTML = '<p class="loading-text">No saved pizzas yet — build one!</p>';
+            }
+          }, 200);
+        } catch {
+          if (el) { el.style.opacity = "1"; el.style.transform = ""; }
+          alert("Failed to delete.");
+        }
+      }
+
       // ── Cat GIF loader ──
       const CAPTIONS = [
         "Consulting the pizza cats...",
@@ -59,46 +560,31 @@
         "Interrogating local delivery drivers...",
         "Almost there, whiskers on the case...",
       ];
-
-      let gifIndex = 0;
-      let gifTimer = null;
+      let gifIndex = 0, gifTimer = null;
       const slides = document.querySelectorAll(".gif-slide");
 
       function startGifs() {
-        gifIndex = 0;
-        setGifSlide(0);
+        gifIndex = 0; setGifSlide(0);
         document.getElementById("gif-loader").classList.add("active");
-        gifTimer = setInterval(() => {
-          gifIndex = (gifIndex + 1) % slides.length;
-          setGifSlide(gifIndex);
-        }, 2500);
+        gifTimer = setInterval(() => { gifIndex = (gifIndex + 1) % slides.length; setGifSlide(gifIndex); }, 2500);
       }
-
       function stopGifs() {
-        clearInterval(gifTimer);
-        gifTimer = null;
+        clearInterval(gifTimer); gifTimer = null;
         document.getElementById("gif-loader").classList.remove("active");
       }
-
       function setGifSlide(idx) {
         slides.forEach((el, i) => el.classList.toggle("active", i === idx));
-        const caption = document.getElementById("gif-caption");
-        caption.style.opacity = "0";
-        setTimeout(() => {
-          caption.textContent = CAPTIONS[idx];
-          caption.style.opacity = "1";
-        }, 150);
+        const cap = document.getElementById("gif-caption");
+        cap.style.opacity = "0";
+        setTimeout(() => { cap.textContent = CAPTIONS[idx]; cap.style.opacity = "1"; }, 150);
       }
 
-      // ── Order link with Text Fragment for auto-highlighting ──
       function openOrder(url, item) {
         try {
           const u = new URL(url);
           u.hash = ":~:text=" + encodeURIComponent(item.slice(0, 50));
           window.open(u.toString(), "_blank", "noopener,noreferrer");
-        } catch {
-          window.open(url, "_blank", "noopener,noreferrer");
-        }
+        } catch { window.open(url, "_blank", "noopener,noreferrer"); }
       }
 
       // ── Search ──
@@ -114,69 +600,71 @@
         }
 
         btn.disabled = true;
-        btn.textContent = "Searching...";
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Searching…';
         resultsEl.innerHTML = "";
+        document.getElementById("search-context-bar").innerHTML = "";
         startGifs();
 
         try {
+          const restaurantType = document.querySelector("#restaurant-type-group .pill.selected")?.dataset.val || "Both";
           const res = await fetch("/api/pizza/search", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ location, radius: Number(radius) }),
+            body: JSON.stringify({ location, radius: Number(radius), pizza: selectedPizza, restaurantType }),
           });
-
           const data = await res.json();
 
-          if (!res.ok) {
-            resultsEl.innerHTML = `<p class="error">${data.error || "Something went wrong."}</p>`;
-            return;
-          }
+          if (!res.ok) { resultsEl.innerHTML = `<p class="error">${data.error || "Something went wrong."}</p>`; return; }
+          if (!data.results || !data.results.length) { resultsEl.innerHTML = '<p class="error">No results found. Try a different location.</p>'; return; }
 
-          if (!data.results || data.results.length === 0) {
-            resultsEl.innerHTML = '<p class="error">No results found. Try a different location.</p>';
-            return;
+          // Show active search filters
+          const ctxBar = document.getElementById("search-context-bar");
+          const tags = [];
+          if (selectedPizza) {
+            const typeIcon = selectedPizza.orderType === "Slice"
+              ? '<i class="fa-solid fa-pizza-slice"></i>'
+              : '🍕';
+            tags.push(`${typeIcon} <strong>${selectedPizza.orderType === "Slice" ? "By the Slice" : "Whole Pizza"}</strong>`);
+            tags.push(`<i class="fa-solid fa-tag"></i> ${selectedPizza.name}`);
           }
+          if (restaurantType !== "Both") {
+            tags.push(`<i class="fa-solid fa-store"></i> ${restaurantType === "Chains" ? "Big Chains only" : "Local only"}`);
+          }
+          tags.push(`<i class="fa-solid fa-location-dot"></i> ${location} · ${radius} mi`);
+          ctxBar.innerHTML = tags.map(t => `<span class="ctx-tag">${t}</span>`).join("");
 
           const cards = data.results.map((r, i) => ({
-            html: `
-              <div class="result-card">
-                <h3>${r.name}</h3>
-                <p class="address">${r.address}</p>
-                <div class="deal-row">
-                  <span class="item">${r.cheapestItem}</span>
-                  <span class="price">${r.price}</span>
-                </div>
-                <p class="note">${r.note}</p>
-                ${r.orderUrl ? `<button type="button" class="order-btn" id="order-btn-${i}">
-                  Order Now
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                    <path d="M2 11L11 2M11 2H5M11 2V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>` : ""}
-              </div>`,
-            r, i
+            html: `<div class="result-card">
+              <h3>${r.name}</h3>
+              <p class="address"><i class="fa-solid fa-location-dot"></i> ${r.address}</p>
+              <div class="deal-row">
+                <span class="item">${r.cheapestItem}</span>
+                <span class="price">${r.price}</span>
+              </div>
+              <p class="note">${r.note}</p>
+              ${r.orderUrl ? `<button type="button" class="order-btn" id="order-btn-${i}">
+                Order Now <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </button>` : ""}
+            </div>`, r, i
           }));
 
           resultsEl.innerHTML = cards.map(c => c.html).join("");
-
           cards.forEach(({ r, i }) => {
             if (!r.orderUrl) return;
-            document.getElementById(`order-btn-${i}`).addEventListener("click", () => {
-              openOrder(r.orderUrl, r.cheapestItem);
-            });
+            document.getElementById(`order-btn-${i}`).addEventListener("click", () => openOrder(r.orderUrl, r.cheapestItem));
           });
-
         } catch {
           resultsEl.innerHTML = '<p class="error">Failed to connect to server.</p>';
         } finally {
           stopGifs();
           btn.disabled = false;
-          btn.textContent = "Find Cheapest Pizza";
+          btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Find Cheapest Pizza';
         }
       }
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") searchPizza();
+      document.addEventListener("keydown", e => {
+        const active = document.querySelector(".tab-panel.active");
+        if (e.key === "Enter" && active && active.id === "tab-find") searchPizza();
       });
     </script>
   </body>
