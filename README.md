@@ -17,7 +17,7 @@ Includes AI-generated pizza suggestions and names.
 [YouTube.com/watch?v=XOFAUmSY_gU/](https://www.youtube.com/watch?v=XOFAUmSY_gU)
 
 ## APIs:
-- [OpenAI API](https://platform.openai.com/docs) — used for AI pizza suggestions (`gpt-5-mini`), AI-generated pizza names (`gpt-5-mini`), and real-time restaurant web search with `gpt-5.5` + `web_search_preview` tool.
+- [OpenAI API](https://platform.openai.com/docs) — used for AI pizza suggestions (`gpt-4o-mini`), AI-generated pizza names (`gpt-4o-mini`), and real-time restaurant web search with `gpt-5-mini` + `web_search_preview` tool.
 
 ## Contact Email:
 cdzoboss@terpmail.umd.edu
